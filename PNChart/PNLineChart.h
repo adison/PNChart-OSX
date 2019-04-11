@@ -34,11 +34,11 @@
 @property (nonatomic) CGFloat xLabelWidth;
 @property (nonatomic) NSFont *xLabelFont;
 @property (nonatomic) NSColor *xLabelColor;
-@property (nonatomic) CGFloat yValueMax;
+@property (nonatomic, readonly) CGFloat yValueMax;
 @property (nonatomic) CGFloat yFixedValueMax;
+@property (nonatomic, readonly) CGFloat yValueMin;
 @property (nonatomic) CGFloat yFixedValueMin;
-@property (nonatomic) CGFloat yValueMin;
-@property (nonatomic) NSInteger yLabelNum;
+@property (nonatomic) NSUInteger yLabelNum;
 @property (nonatomic) CGFloat yLabelHeight;
 @property (nonatomic) NSFont *yLabelFont;
 @property (nonatomic) NSColor *yLabelColor;

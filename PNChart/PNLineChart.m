@@ -192,7 +192,8 @@
             CGPoint p2 = [linePointsArray[i + 1] pointValue];
 
             // Closest distance from point to line
-            float distance = fabsf(((p2.x - p1.x) * (touchPoint.y - p1.y)) - ((p1.x - touchPoint.x) * (p1.y - p2.y)));
+            float distance = fabs(((p2.x - p1.x) * (touchPoint.y - p1.y)) - ((p1.x - touchPoint.x) * (p1.y - p2.y)));
+
             distance /= hypot(p2.x - p1.x, p1.y - p2.y);
 
             if (distance <= 5.0) {
@@ -224,7 +225,7 @@
             CGPoint p1 = [linePointsArray[i] pointValue];
             CGPoint p2 = [linePointsArray[i + 1] pointValue];
 
-            float distanceToP1 = fabsf(hypot(touchPoint.x - p1.x, touchPoint.y - p1.y));
+            float distanceToP1 = fabs(hypot(touchPoint.x - p1.x, touchPoint.y - p1.y));
             float distanceToP2 = hypot(touchPoint.x - p2.x, touchPoint.y - p2.y);
 
             float distance = MIN(distanceToP1, distanceToP2);
@@ -418,11 +419,9 @@
                 last_y = y;
                 
             } else {
-                
                 if ( i != 0 ) {
                     [progressline lineToPoint:CGPointMake(x, y)];
                 }
-                
                 [progressline moveToPoint:CGPointMake(x, y)];
             }
             
@@ -500,8 +499,8 @@
     
     
     // Min value for Y label
-    if (yMax < 5) {
-        yMax = 5.0f;
+    if (yMax < 1) {
+        yMax = 1.0f;
     }
     
     if (yMin < 0) {
@@ -566,8 +565,9 @@
 {
     if (self.isShowCoordinateAxis) {
 
-        CGFloat yAxisOffset = 10.f;
-        
+        CGFloat horizontalOffset = 10.f;
+//        CGFloat verticalOffset = 10.f;
+
         CGContextRef ctx = [[NSGraphicsContext currentContext] CGContext];
         [NSGraphicsContext saveGraphicsState];
         
@@ -578,15 +578,15 @@
         CGFloat yAxisHeight = _chartMargin + _chartCavanHeight;
 
         // draw coordinate axis
-        CGContextMoveToPoint(ctx, _chartMargin + yAxisOffset, _chartMargin + yAxisHeight);
-        CGContextAddLineToPoint(ctx, _chartMargin + yAxisOffset, _chartMargin);
+        CGContextMoveToPoint(ctx, _chartMargin + horizontalOffset, _chartMargin + yAxisHeight);
+        CGContextAddLineToPoint(ctx, _chartMargin + horizontalOffset, _chartMargin);
         CGContextAddLineToPoint(ctx, xAxisWidth, _chartMargin);
         CGContextStrokePath(ctx);
 
         // draw y axis arrow
-        CGContextMoveToPoint(ctx, _chartMargin + yAxisOffset - 3, _chartMargin + yAxisHeight - 6);
-        CGContextAddLineToPoint(ctx, _chartMargin + yAxisOffset, _chartMargin + yAxisHeight);
-        CGContextAddLineToPoint(ctx, _chartMargin + yAxisOffset + 3, _chartMargin + yAxisHeight - 6);
+        CGContextMoveToPoint(ctx, _chartMargin + horizontalOffset - 3, _chartMargin + yAxisHeight - 6);
+        CGContextAddLineToPoint(ctx, _chartMargin + horizontalOffset, _chartMargin + yAxisHeight);
+        CGContextAddLineToPoint(ctx, _chartMargin + horizontalOffset + 3, _chartMargin + yAxisHeight - 6);
         CGContextStrokePath(ctx);
 
         // draw x axis arrow
@@ -609,27 +609,27 @@
             // draw y axis separator
             CGFloat yStepHeight = _chartCavanHeight / _yLabelNum;
             for (NSUInteger i = 0; i < [self.xLabels count]; i++) {
-                point = CGPointMake(_chartMargin + yAxisOffset, (_chartMargin + i * yStepHeight));
+                point = CGPointMake(_chartMargin + horizontalOffset, (_chartMargin + i * yStepHeight));
                 CGContextMoveToPoint(ctx, point.x, point.y);
                 CGContextAddLineToPoint(ctx, point.x + 2, point.y);
                 CGContextStrokePath(ctx);
             }
         }
 
-        NSFont *font = [NSFont systemFontOfSize:11];
+        NSFont *font = [NSFont systemFontOfSize:10];
 
         // draw x unit
         if ([self.xUnit length]) {
             CGFloat height = 20;
             CGRect drawRect = CGRectMake(_chartMargin + _chartCavanWidth - 80, _chartMargin, 100, height);
-            [self drawTextInContext:ctx text:self.xUnit inRect:drawRect font:font alignment:NSRightTextAlignment];
+            [self drawTextInContext:ctx text:self.xUnit inRect:drawRect font:font alignment:NSTextAlignmentRight];
         }
         
         // draw y unit
         if ([self.yUnit length]) {
             CGFloat height = 20;
             CGRect drawRect = CGRectMake(_chartMargin + 10 + 5, CGRectGetHeight(self.bounds) - height, 80, height);
-            [self drawTextInContext:ctx text:self.yUnit inRect:drawRect font:font alignment:NSLeftTextAlignment];
+            [self drawTextInContext:ctx text:self.yUnit inRect:drawRect font:font alignment:NSTextAlignmentLeft];
         }
     }
 
