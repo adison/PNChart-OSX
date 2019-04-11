@@ -53,8 +53,9 @@
 
 - (void)setYLabels:(NSArray *)yLabels
 {
-    CGFloat yStep = (_yValueMax - _yValueMin) / _yLabelNum;
-    CGFloat yStepHeight = _chartCavanHeight / _yLabelNum;
+    NSUInteger yInteval = (_yLabelNum - 1);
+    CGFloat yStep = (_yFixedValueMax - _yFixedValueMin) / yInteval;
+    CGFloat yStepHeight = _chartCavanHeight / yInteval;
     NSString *yLabelFormat = self.yLabelFormat ? : @"%1.f";
 
     if (_yChartLabels) {
@@ -85,14 +86,13 @@
         [_yChartLabels addObject:maxLabel];
 
     } else {
-        NSInteger index = 0;
-        NSInteger num = _yLabelNum + 1;
-
+        NSUInteger index = 0;
+        NSUInteger num = _yLabelNum;
         while (num > 0)
         {
-            PNChartLabel *label = [[PNChartLabel alloc] initWithFrame:CGRectMake(0.0, (NSInteger)(_chartMargin + (index + 1) * yStepHeight - _yLabelHeight / 2.0), (NSInteger)_chartMargin, (NSInteger)_yLabelHeight)];
-            [label setAlignment:NSRightTextAlignment];
-            label.stringValue = [NSString stringWithFormat:yLabelFormat, _yValueMin + (yStep * index)];
+            PNChartLabel *label = [[PNChartLabel alloc] initWithFrame:CGRectMake(0.0, (NSInteger)(_chartMargin + index * yStepHeight - _yLabelHeight / 2.0), (NSInteger)_chartMargin, (NSInteger)_yLabelHeight)];
+            [label setAlignment:NSTextAlignmentRight];
+            label.stringValue = [NSString stringWithFormat:yLabelFormat, _yFixedValueMin + (yStep * index)];
             [self setCustomStyleForYLabel:label];
             [self addSubview:label];
             [_yChartLabels addObject:label];
@@ -129,13 +129,24 @@
     
     NSString *labelText;
 
+    NSMutableArray* real_labels = @[].mutableCopy;
+    for (NSUInteger i = 0; i< xLabels.count; i++) {
+        if ([xLabels[i] length] > 0) {
+            [real_labels addObject:xLabels[i]];
+        }
+    }
+
+    CGFloat labelWidth = _chartCavanWidth / real_labels.count;
+
     if (_showLabel) {
         for (int index = 0; index < xLabels.count; index++) {
             labelText = xLabels[index];
+            if (labelText.length == 0)
+                continue;
 
             NSInteger x = 2 * _chartMargin +  (index * _xLabelWidth) - (_xLabelWidth / 2);
 
-            PNChartLabel *label = [[PNChartLabel alloc] initWithFrame:CGRectMake(x, 0, (NSInteger)_xLabelWidth, (NSInteger)_chartMargin - 5)];
+            PNChartLabel *label = [[PNChartLabel alloc] initWithFrame:CGRectMake(x, 0, (NSInteger)labelWidth, (NSInteger)_chartMargin - 5)];
             label.stringValue = labelText;
             [self setCustomStyleForXLabel:label];
             [self addSubview:label];
@@ -325,17 +336,17 @@
             
             yValue = chartData.getData(i).y;
             
-            if (!(_yValueMax - _yValueMin)) {
+            if (!(_yFixedValueMax - _yFixedValueMin)) {
                 innerGrade = 0.5;
             } else {
-                innerGrade = (yValue - _yValueMin) / (_yValueMax - _yValueMin);
+                innerGrade = (yValue - _yFixedValueMin) / (_yFixedValueMax - _yFixedValueMin);
             }
             
             CGFloat offSetX = (_chartCavanWidth) / (chartData.itemCount);
-            
-            int x = 2 * _chartMargin +  (i * offSetX);
-            int y = _chartMargin + (_chartCavanHeight / _yLabelNum) + (innerGrade * _chartCavanHeight);
-            
+            //TODO: why 1.3?
+            int x = _chartMargin * 1.3 +  (i * offSetX);
+            int y = _chartMargin + (innerGrade * _chartCavanHeight);
+
             // Circular point
             if (chartData.inflexionPointStyle == PNLineChartPointStyleCircle) {
                 
@@ -508,7 +519,7 @@
     }
     
     _yValueMin = _yFixedValueMin ? _yFixedValueMin : yMin ;
-    _yValueMax = _yFixedValueMax ? _yFixedValueMax : yMax + yMax / 10.0;
+    _yValueMax = _yFixedValueMax ? _yFixedValueMax : yMax * 1.1;
     
     if (_showLabel) {
         [self setYLabels:yLabelsArray];
@@ -607,7 +618,7 @@
             }
 
             // draw y axis separator
-            CGFloat yStepHeight = _chartCavanHeight / _yLabelNum;
+            CGFloat yStepHeight = _chartCavanHeight / (_yLabelNum - 1);
             for (NSUInteger i = 0; i < [self.xLabels count]; i++) {
                 point = CGPointMake(_chartMargin + horizontalOffset, (_chartMargin + i * yStepHeight));
                 CGContextMoveToPoint(ctx, point.x, point.y);
